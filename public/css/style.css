@@ -48,3 +48,7 @@ ol, ul {
 .container {
   min-width: 600px;
 }
+
+ul>li {
+  list-style: none;
+}
