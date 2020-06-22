@@ -6,6 +6,7 @@ const Square = (props) => {
       className="square"
       onClick={props.onClick}
       key={props.i}
+      iswinning={props.isWinning}
     >
       {props.value}
     </button>
@@ -18,16 +19,17 @@ class Board extends React.Component {
     super(props)
     this.state = {
       size: props.size,
-      winningSeq: []
+      // winningSeq: props.winningSeq
     }
   }
 
   renderSquare(i) {
+    // console.log("In renderSQUARE", this.props.winningSeq)
     return <Square
       value={this.props.squares[i]}
       onClick={() => this.props.onClick(i)}
       key={i}
-      isWinning={false}
+      isWinning={(this.props.winningSeq && this.props.winningSeq.indexOf(i) !== -1) ? "true" : "false"}
     />;
   }
 
@@ -68,44 +70,46 @@ class Game extends React.Component {
       }],
       stepNumber: 0,
       xIsNext: true,
-      historyPoints: { seq: [NaN], cur: 1 }
+      historyPoints: { seq: [NaN], cur: 1 },
+      // winningSeq: []
     }
   }
 
   calculateWinner(size, squares) {
     for (let t = 0; t < size * size; ++t) {
       if (squares[t] &&
+        t % size + 4 < size &&
         squares[t] === squares[t + 1] &&
         squares[t] === squares[t + 2] &&
         squares[t] === squares[t + 3] &&
         squares[t] === squares[t + 4]) {
-        highLight([t, t + 1, t + 2, t + 3, t + 4])
-        return squares[t]
+        return [squares[t], [t, t + 1, t + 2, t + 3, t + 4]]
       }
       if (squares[t] &&
+        Math.floor(t / size) + 4 < size &&
         squares[t] === squares[t + size] &&
         squares[t] === squares[t + 2 * size] &&
         squares[t] === squares[t + 3 * size] &&
         squares[t] === squares[t + 4 * size]) {
-        highLight([t, t + size, t + 2 * size, t + 3 * size, t + 4 * size])
-        return squares[t]
+        return [squares[t], [t, t + size, t + 2 * size, t + 3 * size, t + 4 * size]]
       }
       if (squares[t] &&
+        t % size + 4 < size &&
+        Math.floor(t / size) + 4 < size &&
         squares[t] === squares[t + size + 1] &&
         squares[t] === squares[t + 2 * (size + 1)] &&
         squares[t] === squares[t + 3 * (size + 1)] &&
         squares[t] === squares[t + 4 * (size + 1)]) {
-        highLight([t, t + size + 1, t + 2 * (size + 1), t + 3 * (size + 1), t + 4 * (size + 1)])
-
-        return squares[t]
+        return [squares[t], [t, t + size + 1, t + 2 * (size + 1), t + 3 * (size + 1), t + 4 * (size + 1)]]
       }
       if (squares[t] &&
+        t % size - 4 >= 0 &&
+        Math.floor(t / size) - 4 >= 0 &&
         squares[t] === squares[t + size - 1] &&
         squares[t] === squares[t + 2 * (size - 1)] &&
         squares[t] === squares[t + 3 * (size - 1)] &&
         squares[t] === squares[t + 4 * (size - 1)]) {
-        highLight([t, t + size - 1, t + 2 * (size - 1), t + 3 * (size - 1), t + 4 * (size - 1)])
-        return squares[t]
+        return [squares[t], [t, t + size - 1, t + 2 * (size - 1), t + 3 * (size - 1), t + 4 * (size - 1)]]
       }
     }
     return null
@@ -138,7 +142,13 @@ class Game extends React.Component {
   render() {
     const history = this.state.history
     const current = history[this.state.stepNumber]
-    const winner = this.calculateWinner(this.state.size, current.squares)
+    const winnerDesc = this.calculateWinner(this.state.size, current.squares)
+    const winner = winnerDesc
+      ? winnerDesc[0]
+      : null
+    const winningSeq = winnerDesc
+      ? winnerDesc[1]
+      : null
 
     const moves = history.map((step, move) => {
       const hpsm = this.state.historyPoints.seq[move]
@@ -158,9 +168,13 @@ class Game extends React.Component {
     let status
     if (winner) {
       status = 'Winner: ' + winner
-    } else {
+    } else if (this.state.stepNumber < this.state.size * this.state.size) {
       status = 'Next player: ' + (this.state.xIsNext ? '●' : '○')
+    } else {
+      status = 'Draw'
     }
+
+    winningSeq && console.log("winningSeq", winningSeq)
 
     return (
       <div className="container">
@@ -171,10 +185,11 @@ class Game extends React.Component {
               squares={current.squares}
               onClick={(i) => this.handleClick(i)}
               size={this.state.size}
+              winningSeq={winningSeq}
             />
           </div>
           <div className="game-info ml-5">
-            <div className="h4">{status}</div>
+            <div className="h4 ml-4">{status}</div>
             <ul>{moves}</ul>
           </div>
         </div>
@@ -183,9 +198,5 @@ class Game extends React.Component {
   }
 }
 
-
-const highLight = (winSeq) => {
-
-}
 
 export default Game;

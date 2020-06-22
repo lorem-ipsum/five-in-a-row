@@ -46,9 +46,13 @@ ol, ul {
 }
 
 .container {
-  min-width: 600px;
+  min-width: 660px;
 }
 
 ul>li {
   list-style: none;
+}
+
+.square[iswinning=true] {
+  background: rgb(230, 204, 255);
 }
