@@ -104,7 +104,7 @@ class Game extends React.Component {
       }
       if (squares[t] &&
         t % size - 4 >= 0 &&
-        Math.floor(t / size) - 4 >= 0 &&
+        Math.floor(t / size) + 4 < size &&
         squares[t] === squares[t + size - 1] &&
         squares[t] === squares[t + 2 * (size - 1)] &&
         squares[t] === squares[t + 3 * (size - 1)] &&
@@ -124,7 +124,7 @@ class Game extends React.Component {
     }
     squares[i] = this.state.xIsNext ? '●' : '○'
     this.setState({
-      historyPoints: { seq: this.state.historyPoints.seq.concat(i), cur: this.state.historyPoints.cur + 1 },
+      historyPoints: { seq: this.state.historyPoints.seq.slice(0, this.state.stepNumber + 1).concat(i), cur: this.state.historyPoints.cur + 1 },
       history: history.concat([{ squares }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext
